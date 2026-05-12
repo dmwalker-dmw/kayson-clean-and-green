@@ -1724,6 +1724,12 @@ TO DEPLOY ON GITHUB PAGES:
     // =======================================
     // BOOKING FORM SUBMIT
     // =======================================
+    // ---------------------------------------------------------------
+    // REPLACE 'YOUR_WEB3FORMS_KEY_HERE' with the key emailed to you
+    // from web3forms.com after entering grubsnake562@gmail.com
+    // ---------------------------------------------------------------
+    const WEB3FORMS_KEY = 'b25d50ea-f0bc-48f8-8da7-8d89d72c11d3';
+
     document.getElementById('submitBtn').addEventListener('click', async () => {
       const fields = ['firstName', 'lastName', 'phone', 'address', 'servicesField', 'prefDate', 'prefTime'];
       let valid = true;
@@ -1743,34 +1749,55 @@ TO DEPLOY ON GITHUB PAGES:
         return;
       }
 
-      const firstName   = document.getElementById('firstName').value.trim();
-      const lastName    = document.getElementById('lastName').value.trim();
+      const firstName     = document.getElementById('firstName').value.trim();
+      const lastName      = document.getElementById('lastName').value.trim();
       const customerPhone = document.getElementById('phone').value.trim();
-      const address     = document.getElementById('address').value.trim();
-      const services    = document.getElementById('servicesField').value.trim();
-      const date        = document.getElementById('prefDate').value;
-      const time        = document.getElementById('prefTime').value;
-      const notes       = document.getElementById('notes').value.trim();
-      const fullName    = firstName + ' ' + lastName;
+      const address       = document.getElementById('address').value.trim();
+      const services      = document.getElementById('servicesField').value.trim();
+      const date          = document.getElementById('prefDate').value;
+      const time          = document.getElementById('prefTime').value;
+      const notes         = document.getElementById('notes').value.trim();
+      const fullName      = firstName + ' ' + lastName;
 
-      // Build estimated total from summary
       const totalEl = document.getElementById('summaryTotal');
       const estimatedTotal = totalEl ? totalEl.textContent : 'See services above';
 
-      // ---- MAILTO ----
-      const subject = encodeURIComponent("New Booking Request – Kayson's Clean & Green");
-      const body = encodeURIComponent(
-        `Customer Name: ${fullName}\n` +
-        `Customer Phone: ${customerPhone}\n` +
-        `Address: ${address}\n` +
-        `Services Requested:\n${services}\n` +
-        `Preferred Date: ${date}\n` +
-        `Preferred Time: ${time}\n` +
-        `Additional Notes: ${notes || 'None'}\n` +
-        `Estimated Total: ${estimatedTotal}`
-      );
-      const mailtoLink = `mailto:grubsnake562@gmail.com?subject=${subject}&body=${body}`;
-      window.location.href = mailtoLink;
+      // Disable button and show loading state
+      const btn = document.getElementById('submitBtn');
+      btn.textContent = 'Sending…';
+      btn.disabled = true;
+
+      // ---- EMAIL via Web3Forms (sends directly — no email app opens) ----
+      const emailBody =
+        `Customer Name: ${fullName}
+Customer Phone: ${customerPhone}
+Address: ${address}
+Services Requested:
+${services}
+Preferred Date: ${date}
+Preferred Time: ${time}
+Additional Notes: ${notes || 'None'}
+Estimated Total: ${estimatedTotal}`;
+
+      let emailOk = false;
+      try {
+        const res = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            access_key: WEB3FORMS_KEY,
+            subject: "📬 New Booking Request – Kayson's Clean & Green",
+            from_name: fullName,
+            email: 'grubsnake562@gmail.com',
+            message: emailBody,
+            botcheck: ''
+          })
+        });
+        const data = await res.json();
+        emailOk = data.success;
+      } catch (e) {
+        console.log('Web3Forms error:', e);
+      }
 
       // ---- SMS via Textbelt (free tier: 1/day) ----
       // NOTE: The phone number for SMS notifications is embedded in the JavaScript only.
@@ -1778,7 +1805,6 @@ TO DEPLOY ON GITHUB PAGES:
       // a limit of 1 free SMS per day. For higher volume, Kayson can purchase a Textbelt API
       // key at textbelt.com and replace "textbelt" with his paid key in the fetch() call.
       const smsMessage = `📬 New Booking! ${fullName} at ${address} wants ${services.split('\n')[0]} on ${date} (${time}). Check grubsnake562@gmail.com for details.`;
-
       try {
         await fetch('https://textbelt.com/text', {
           method: 'POST',
@@ -1790,13 +1816,21 @@ TO DEPLOY ON GITHUB PAGES:
           })
         });
       } catch (e) {
-        // Silent fail — email already sent via mailto
         console.log('SMS notification could not be sent:', e);
       }
 
-      // ---- Show success ----
-      document.getElementById('bookingFormWrap').style.display = 'none';
-      document.getElementById('successMsg').style.display = 'block';
+      // ---- Show success or fallback ----
+      if (emailOk) {
+        document.getElementById('bookingFormWrap').style.display = 'none';
+        document.getElementById('successMsg').style.display = 'block';
+      } else {
+        // Fallback: if Web3Forms fails (key not set yet), open mailto as backup
+        const subject = encodeURIComponent("New Booking Request – Kayson's Clean & Green");
+        const body = encodeURIComponent(emailBody);
+        window.location.href = `mailto:grubsnake562@gmail.com?subject=${subject}&body=${body}`;
+        btn.textContent = '📅 Request Booking';
+        btn.disabled = false;
+      }
     });
 
     // =======================================
