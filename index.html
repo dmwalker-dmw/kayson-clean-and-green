@@ -1140,7 +1140,7 @@ TO DEPLOY ON GITHUB PAGES:
         <div class="hero-text reveal">
           <div class="hero-badge">
             <span class="dot"></span>
-            Serving Powers Ave & Surrounding Neighbors
+            Serving Neighbors in the Vinyl Tap &amp; Schulman's Neighborhood
           </div>
           <h1 class="hero-headline">
             <em>Sparkling Clean Cans.</em><br>
@@ -1291,6 +1291,39 @@ TO DEPLOY ON GITHUB PAGES:
           <div class="service-name">Flame Weeding (Driveways &amp; Cracks)</div>
           <div class="service-desc">Eco-friendly flame weeding eliminates weeds in driveway cracks and pavement.</div>
           <div class="service-price">Starting at $30/session</div>
+        </div>
+
+        <!-- Card 9: Mulching -->
+        <div class="service-card reveal reveal-delay-2" data-service="Mulching" data-base-price="18" id="card-mulch">
+          <div class="service-card-top">
+            <div class="service-emoji">🪴</div>
+            <div class="service-check-wrap">
+              <div class="service-check"></div>
+            </div>
+          </div>
+          <div class="service-name">Mulching</div>
+          <div class="service-desc">Fresh mulch installed in garden beds and around trees for a clean, polished look.</div>
+          <div class="trash-tiers">
+            <div><span>Per bag:</span> $18</div>
+            <div><span>5 bags:</span> $90</div>
+            <div><span>10 bags:</span> $180</div>
+          </div>
+          <div class="qty-selector" id="mulchQty">
+            <label for="numBags">Number of Bags:</label>
+            <select id="numBags">
+              <option value="1">1 Bag</option>
+              <option value="2">2 Bags</option>
+              <option value="3">3 Bags</option>
+              <option value="4">4 Bags</option>
+              <option value="5">5 Bags</option>
+              <option value="6">6 Bags</option>
+              <option value="7">7 Bags</option>
+              <option value="8">8 Bags</option>
+              <option value="9">9 Bags</option>
+              <option value="10">10 Bags</option>
+            </select>
+            <span class="qty-price-display" id="mulchPriceDisplay">$18</span>
+          </div>
         </div>
 
         <!-- Card 8: Bundle Deal -->
@@ -1452,17 +1485,29 @@ TO DEPLOY ON GITHUB PAGES:
 
         <div class="review-card reveal">
           <div class="review-stars">★★★★★</div>
-          <p class="review-text">"Kayson did an amazing job on our trash cans — I had no idea they could look that clean! He was on time, polite, and thorough. Highly recommend to anyone on the block!"</p>
+          <p class="review-text">"Kayson is reliable, shows up on time, and does great work. His prices are fair. I'd recommend him."</p>
           <div class="review-meta">
-            <div class="review-avatar">👩</div>
+            <div class="review-avatar">👨</div>
             <div>
-              <div class="review-name">Sandra M.</div>
+              <div class="review-name">Chad</div>
               <div class="review-label">Powers Ave Neighbor</div>
             </div>
           </div>
         </div>
 
         <div class="review-card reveal reveal-delay-1">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">"Foremost, Kayson is a pleasant young man with tremendous drive and determination. He is a hard-worker who follows detailed directions and capably performs outdoor projects at very reasonable rates. I have been extremely satisfied with his work for three years and enthusiastically recommend him. Knowing that I am supporting a neighbor makes me happy!"</p>
+          <div class="review-meta">
+            <div class="review-avatar">👩</div>
+            <div>
+              <div class="review-name">Marsha</div>
+              <div class="review-label">Powers Ave Neighbor</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-card reveal reveal-delay-2">
           <div class="review-stars">★★★★★</div>
           <p class="review-text">"Had Kayson mow the lawn and trim the bushes. Professional job, better than services I've paid twice as much for. Will definitely be a regular customer!"</p>
           <div class="review-meta">
@@ -1662,6 +1707,21 @@ TO DEPLOY ON GITHUB PAGES:
     });
 
     // =======================================
+    // MULCH PRICING LOGIC
+    // =======================================
+    function getMulchPrice(numBags) {
+      return numBags * 18;
+    }
+
+    const numBagsSelect = document.getElementById('numBags');
+    const mulchPriceDisplay = document.getElementById('mulchPriceDisplay');
+    numBagsSelect.addEventListener('change', () => {
+      const price = getMulchPrice(parseInt(numBagsSelect.value));
+      mulchPriceDisplay.textContent = '$' + price;
+      updateSummary();
+    });
+
+    // =======================================
     // SERVICE CARD SELECTION
     // =======================================
     const serviceCards = document.querySelectorAll('.service-card');
@@ -1679,6 +1739,11 @@ TO DEPLOY ON GITHUB PAGES:
           const qtyEl = document.getElementById('trashQty');
           qtyEl.classList.toggle('show', card.classList.contains('selected'));
         }
+        // Show/hide mulch qty selector
+        if (card.id === 'card-mulch') {
+          const mulchEl = document.getElementById('mulchQty');
+          mulchEl.classList.toggle('show', card.classList.contains('selected'));
+        }
         updateSummary();
       });
     });
@@ -1695,6 +1760,10 @@ TO DEPLOY ON GITHUB PAGES:
           const qty = parseInt(numCansSelect.value);
           price = getTrashPrice(qty);
           name = `Trash Can Power Washing (${qty} can${qty > 1 ? 's' : ''})`;
+        } else if (card.id === 'card-mulch') {
+          const bags = parseInt(numBagsSelect.value);
+          price = getMulchPrice(bags);
+          name = `Mulching (${bags} bag${bags > 1 ? 's' : ''})`;
         } else {
           name = card.getAttribute('data-service');
           price = parseInt(card.getAttribute('data-price')) || 0;
@@ -1728,7 +1797,7 @@ TO DEPLOY ON GITHUB PAGES:
     // REPLACE 'YOUR_WEB3FORMS_KEY_HERE' with the key emailed to you
     // from web3forms.com after entering grubsnake562@gmail.com
     // ---------------------------------------------------------------
-    const WEB3FORMS_KEY = 'b25d50ea-f0bc-48f8-8da7-8d89d72c11d3';
+    const WEB3FORMS_KEY = 'YOUR_WEB3FORMS_KEY_HERE';
 
     document.getElementById('submitBtn').addEventListener('click', async () => {
       const fields = ['firstName', 'lastName', 'phone', 'address', 'servicesField', 'prefDate', 'prefTime'];
